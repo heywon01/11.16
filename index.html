@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수학 문제</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="app" class="max-w-7xl mx-auto p-4 min-h-screen flex flex-col">
+
+        <div id="name-input-screen" class="flex-grow flex items-center justify-center">
+            <div class="w-full max-w-md bg-white rounded-xl shadow-2xl p-8 space-y-6">
+                <h2 class="text-3xl font-bold text-center text-indigo-600">이름을 입력하세요</h2>
+                <form id="name-input-form" class="space-y-6">
+                    <div>
+                        <label for="user-name" class="text-sm font-medium text-gray-700">이름</label>
+                        <input id="user-name" type="text" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="사용할 이름을 입력하세요">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">시작하기</button>
+                </form>
+            </div>
+        </div>
+        <div id="login-screen" class="hidden"></div>
+        <div id="signup-screen" class="hidden"></div>
+
+        <div id="main-app-screen" class="hidden flex-grow flex flex-col">
+            <nav class="bg-white shadow-md rounded-xl mb-6 p-4 flex justify-end items-center">
+                <div class="flex items-center space-x-4">
+                    <button id="nav-problems" class="px-4 py-2 rounded-lg hover:bg-gray-100 transition">문제 화면</button>
+                    <button id="nav-users" class="px-4 py-2 rounded-lg hover:bg-gray-100 transition">사용자 명단</button>
+                    <button id="nav-admin-auth" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition">관리자 인증</button>
+                    <button id="nav-add-problem" class="hidden bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">문제 추가</button>
+                    <div class="relative group">
+                         <button id="nav-account" class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+                            <span id="user-name-display"></span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                         </button>
+                         <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
+                            <button id="nav-edit-account" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">계정 정보 수정</button>
+                            <button id="logout-button" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">로그아웃</button>
+                         </div>
+                    </div>
+                </div>
+            </nav>
+
+            <main id="main-content" class="flex-grow bg-white rounded-xl shadow-lg p-6 overflow-y-auto custom-scrollbar">
+                
+                <div id="problem-view">
+                    <h3 class="text-2xl font-bold mb-6 border-b pb-2">오늘의 문제</h3>
+                    <div id="problem-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        </div>
+
+                    <div id="calendar-section" class="mt-12">
+                         <h3 class="text-2xl font-bold mb-6 border-b pb-2">날짜별 문제 찾아보기</h3>
+                         <div id="calendar-container" class="bg-gray-50 p-6 rounded-lg">
+                            </div>
+                         <div id="calendar-problems-display" class="mt-4"></div>
+                    </div>
+                </div>
+
+                <div id="user-list-view" class="hidden">
+                    <h3 class="text-2xl font-bold mb-6 border-b pb-2">전체 사용자</h3>
+                    <ul id="user-list-container" class="space-y-3">
+                        </ul>
+                </div>
+
+                <div id="add-problem-view" class="hidden">
+                     <h3 class="text-2xl font-bold mb-6 border-b pb-2">새 문제 추가</h3>
+                     <form id="add-problem-form" class="space-y-6">
+                         <div>
+                            <label class="block text-sm font-medium text-gray-700">문제 내용 (글)</label>
+                            <textarea id="problem-text" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="문제 내용을 입력하세요."></textarea>
+                            <label class="block text-sm font-medium text-gray-700 mt-4">문제 이미지 (선택 사항)</label>
+                            <input type="file" id="problem-image-upload" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                            <img id="problem-image-preview" class="hidden mt-2 rounded-lg max-h-48" alt="문제 이미지 미리보기">
+                         </div>
+
+                         <div id="options-container" class="space-y-4">
+                            </div>
+
+                         <div class="flex items-center space-x-4">
+                             <button type="button" id="add-option-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">선택지 추가</button>
+                         </div>
+                         
+                         <div class="flex justify-end space-x-4 pt-4">
+                             <button type="button" id="cancel-add-problem" class="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition">취소</button>
+                             <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">문제 저장</button>
+                         </div>
+                     </form>
+                </div>
+
+                <div id="account-view" class="hidden">
+                    <h3 class="text-2xl font-bold mb-6 border-b pb-2">계정 정보 수정</h3>
+                    <form id="account-edit-form" class="space-y-6 max-w-md">
+                        <div>
+                            <label for="edit-name" class="text-sm font-medium text-gray-700">이름</label>
+                            <input id="edit-name" type="text" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                         <div class="flex justify-start space-x-4 pt-4">
+                             <button type="button" id="cancel-edit-account" class="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition">취소</button>
+                             <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">저장</button>
+                         </div>
+                    </form>
+                </div>
+
+            </main>
+        </div>
+
+        <div id="problem-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div id="problem-modal-content" class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                <div class="p-6 border-b flex justify-between items-center">
+                    <h3 class="text-2xl font-bold">문제 풀기</h3>
+                    <button id="close-modal-btn" class="text-gray-500 hover:text-gray-800 text-3xl font-bold">&times;</button>
+                </div>
+                <div class="p-6 flex-grow overflow-y-auto custom-scrollbar">
+                    <div id="modal-problem-content" class="mb-6"></div>
+                    <div id="modal-options-container" class="space-y-3"></div>
+                    <div id="modal-feedback" class="mt-4 text-center font-bold"></div>
+                </div>
+                 <div class="p-6 border-t flex justify-between items-center bg-gray-50 rounded-b-2xl">
+                    <button id="show-solvers-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm">푼 사람들 보기</button>
+                    <div id="modal-solvers-list" class="hidden absolute bottom-20 left-6 bg-white p-4 rounded-lg shadow-lg border text-sm">
+                        <h4 class="font-bold mb-2">이 문제를 푼 사람들</h4>
+                        <ul class="list-disc list-inside"></ul>
+                    </div>
+                    <p id="solver-count" class="text-sm text-gray-600"></p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="custom-modal-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center">
+                <p id="custom-modal-message" class="text-gray-800 mb-6 text-lg"></p>
+                <div class="flex justify-center space-x-4">
+                    <button id="custom-modal-cancel" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition">취소</button>
+                    <button id="custom-modal-ok" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">확인</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-auth-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="w-full max-w-md bg-white rounded-xl shadow-2xl p-8 space-y-6">
+                <h3 class="text-2xl font-bold text-center text-indigo-600">관리자 인증</h3>
+                <form id="admin-auth-form" class="space-y-4">
+                    <div>
+                        <label for="admin-id" class="text-sm font-medium text-gray-700">관리자 ID</label>
+                        <input id="admin-id" type="text" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="relative">
+                        <label for="admin-password" class="text-sm font-medium text-gray-700">비밀번호</label>
+                        <input id="admin-password" type="password" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    <p id="admin-auth-error" class="text-red-500 text-sm hidden">ID 또는 비밀번호가 일치하지 않습니다.</p>
+                    <div class="flex justify-end space-x-4 pt-2">
+                         <button type="button" id="cancel-admin-auth" class="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition">취소</button>
+                         <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">인증</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="loading-overlay" class="hidden fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+            <div class="loader"></div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

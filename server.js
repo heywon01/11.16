@@ -17,7 +17,9 @@ app.use(express.json()); // JSON 요청 본문 파싱
 // --- MongoDB 연결 ---
 const MONGODB_URI = process.env.MONGODB_URI;
 
-mongoose.connect(MONGODB_URI)
+mongoose.connect(MONGODB_URI, {
+    authSource: 'admin'
+})
     .then(() => console.log('✅ MongoDB Atlas에 성공적으로 연결되었습니다.'))
     .catch(err => {
         console.error('❌ MongoDB 연결 오류:', err.message);

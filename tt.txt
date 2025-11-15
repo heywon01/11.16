@@ -1,0 +1,7 @@
+프로세스 id찾기
+netstat -ano | findstr :4000
+
+해당 프로세스 강제 종료
+taskkill /PID (프로세스id) /F
+
+https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap

@@ -1,0 +1,16 @@
+# Node.js 관련
+/node_modules
+/package-lock.json
+
+# 환경 변수 (민감 정보 보호)
+.env
+.env.*
+
+# 빌드 결과물 및 불필요한 파일
+/public/output.css
+*.exe
+/vendor
+
+# 운영체제/에디터 관련 파일
+.DS_Store
+*.log

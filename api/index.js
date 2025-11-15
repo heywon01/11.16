@@ -310,7 +310,7 @@ app.post('/api/problems/:problemId/solve', async (req, res) => {
 });
 
 // Vercel deployment requires the handler to be exported
-module.exports = app;
+module.exports = server;
 
 // Local development server setup
 

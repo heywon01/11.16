@@ -9,9 +9,9 @@
     <link rel="icon" href="/favicon.ico">
 </head>
 <body class="bg-gray-100 text-gray-800">
-    <script src="/socket.io/socket.io.js"></script>
-    <div id="app" class="max-w-7xl mx-auto p-4 min-h-screen flex flex-col">
     
+    <div id="app" class="max-w-7xl mx-auto p-4 min-h-screen flex flex-col">
+
         <div id="name-input-screen" class="flex-grow flex items-center justify-center">
             <div class="w-full max-w-md bg-white rounded-xl shadow-2xl p-8 space-y-6">
                 <h2 class="text-3xl font-bold text-center text-indigo-600">이름을 입력하세요</h2>
@@ -24,6 +24,7 @@
                 </form>
             </div>
         </div>
+        
         <div id="login-screen" class="hidden"></div>
         <div id="signup-screen" class="hidden"></div>
 
@@ -52,12 +53,12 @@
                 <div id="problem-view">
                     <h3 class="text-2xl font-bold mb-6 border-b pb-2">오늘의 문제</h3>
                     <div id="problem-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        </div>
+                    </div>
 
                     <div id="calendar-section" class="mt-12">
                          <h3 class="text-2xl font-bold mb-6 border-b pb-2">날짜별 문제 찾아보기</h3>
                          <div id="calendar-container" class="bg-gray-50 p-6 rounded-lg">
-                            </div>
+                         </div>
                          <div id="calendar-problems-display" class="mt-4"></div>
                     </div>
                 </div>
@@ -65,7 +66,7 @@
                 <div id="user-list-view" class="hidden">
                     <h3 class="text-2xl font-bold mb-6 border-b pb-2">전체 사용자</h3>
                     <ul id="user-list-container" class="space-y-3">
-                        </ul>
+                    </ul>
                 </div>
 
                 <div id="add-problem-view" class="hidden">
@@ -84,7 +85,7 @@
                          </div>
 
                          <div id="options-container" class="space-y-4">
-                            </div>
+                         </div>
 
                          <div class="flex items-center space-x-4">
                              <button type="button" id="add-option-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">선택지 추가</button>
@@ -172,6 +173,8 @@
         </div>
 
     </div>
-    <script src="/script.js"></script>
+    
+    <script src="/socket.io/socket.io.js"></script> 
+    <script src="/script.js"></script> 
 </body>
 </html>

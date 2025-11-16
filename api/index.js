@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5001;
 const MONGODB_URI = process.env.MONGODB_URI;
 // ⚠️ 별도로 배포된 웹소켓 서버의 주소를 .env에 설정해야 합니다. (예: https://your-socket-server.com)
 const SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL; 
-
+const projectRoot = path.join(__dirname, '..');
 
 
 // ===== MongoDB 연결 캐싱 로직 (서버리스 충돌 방지) =====
@@ -61,19 +61,13 @@ app.use(express.json());
 app.use(cors());
 
 // 정적 파일 서빙 경로 설정 (CSS 파일 적용 문제 해결)
-const projectRoot = path.join(__dirname, '..');
 app.use('/public', express.static(path.join(projectRoot, 'public')));
 app.use(express.static(projectRoot));
 
 // API 요청 시에만 DB 연결 시도 (미들웨어)
 app.use('/api', async (req, res, next) => {
-    try {
-        await connectToDatabase();
-        next();
-    } catch (error) {
-        console.error('API 요청 전 DB 연결 실패:', error.message);
-        res.status(503).send('Database connection unavailable.');
-    }
+    await connectToDatabase();
+    next();
 });
 
 // ===== Schemas and Models (점수 필드 제거됨) =====

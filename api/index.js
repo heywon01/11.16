@@ -5,16 +5,16 @@ const cors = require('cors');
 const path = require('path');
 const http = require('http'); // 1. http 모듈 추가
 const { Server } = require('socket.io'); // 2. Server 클래스 가져오기
-const io = new Server(server);
+//const io = new Server(server);
 
 const app = express();
 const server = http.createServer(app); // 3. app을 사용하여 HTTP 서버 생성
-//const io = new Server(server, { // 4. 생성된 HTTP 서버에 Socket.IO 연결
-    //cors: {
-        //origin: "*", // 실제 환경에 맞게 조정 필요
-        //methods: ["GET", "POST"]
-    //}
-//});
+const io = new Server(server, { // 4. 생성된 HTTP 서버에 Socket.IO 연결
+    cors: {
+        origin: "*", // 실제 환경에 맞게 조정 필요
+        methods: ["GET", "POST"]
+    }
+});
 
 const PORT = process.env.PORT || 5001;
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -34,6 +34,7 @@ if (!MONGODB_URI) {
 // Middleware
 app.use(express.json());
 app.use(cors());
+app.use(express.static(projectRoot));
 
 // 정적 파일 서빙 경로 설정
 app.use(express.static(path.join(__dirname, '..', 'public')));

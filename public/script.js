@@ -1,4 +1,4 @@
-const socket = io('http://localhost:5001');
+const socket = io();
 let allProblems = [];
 let problems = [];
 let currentUser = null;

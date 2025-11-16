@@ -80,9 +80,15 @@ const ProblemSchema = new mongoose.Schema({
 const User = mongoose.model('User', UserSchema); 
 const Problem = mongoose.model('Problem', ProblemSchema);
 
+const projectRoot = path.join(__dirname, '..');
+
 // ===== Routes =====
 // 정적 파일 서빙 경로 설정 (클라이언트 HTML/CSS/JS)
 app.use('/public', express.static(path.join(__dirname, '..', 'public')));
+
+app.use(express.static(path.join(projectRoot, 'public')));
+
+app.use(express.static(projectRoot));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'index.html'));
@@ -319,7 +325,7 @@ app.post('/api/problems/:problemId/solve', async (req, res) => {
 });
 
 // Vercel deployment requires the handler to be exported
-module.exports = server;
+module.exports = app;
 
 // Local development server setup
 

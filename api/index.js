@@ -12,10 +12,7 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 5001;
 const MONGODB_URI = process.env.MONGODB_URI;
 
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => {
     console.log('MongoDB connected successfully.'); // Vercel 로그에서 이 메시지를 확인해야 합니다.
 })
@@ -27,6 +24,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use(express.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(path.join(__dirname, '..', '')));
 
 const io = new Server(server, {
     cors: {

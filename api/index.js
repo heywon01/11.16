@@ -1,6 +1,3 @@
-// [index.js] - Vercel에 배포하여 API 요청 및 DB 처리만 담당
-// 이 파일은 api/index.js 경로에 위치해야 합니다.
-
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -64,8 +61,8 @@ app.use(express.json());
 app.use(cors());
 
 // 정적 파일 서빙 경로 설정 (CSS 파일 적용 문제 해결)
-app.use(express.static(projectRoot)); // index.html, style.css 등 루트 파일
 app.use(express.static(path.join(projectRoot, 'public'))); // output.css (Tailwind 결과물)
+app.use(express.static(projectRoot));
 
 // API 요청 시에만 DB 연결 시도 (미들웨어)
 app.use('/api', async (req, res, next) => {

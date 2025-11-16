@@ -12,7 +12,9 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 5001;
 const MONGODB_URI = process.env.MONGODB_URI;
 
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 5000,
+})
 .then(() => {
     console.log('MongoDB connected successfully.'); // Vercel 로그에서 이 메시지를 확인해야 합니다.
 })

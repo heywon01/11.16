@@ -61,7 +61,7 @@ app.use(express.json());
 app.use(cors());
 
 // 정적 파일 서빙 경로 설정 (CSS 파일 적용 문제 해결)
-app.use(express.static(path.join(projectRoot, 'public'))); // output.css (Tailwind 결과물)
+app.use('/public', express.static(path.join(projectRoot, 'public')));
 app.use(express.static(projectRoot));
 
 // API 요청 시에만 DB 연결 시도 (미들웨어)

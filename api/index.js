@@ -17,9 +17,6 @@ const server = http.createServer(app); // 3. app을 사용하여 HTTP 서버 생
 //});
 
 const PORT = process.env.PORT || 5001;
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
 const MONGODB_URI = process.env.MONGODB_URI;
 const projectRoot = path.join(__dirname, '..');
 

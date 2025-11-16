@@ -1,69 +1,93 @@
+// [index.js] - Vercel에 배포하여 API 요청 및 DB 처리만 담당
+// 이 파일은 api/index.js 경로에 위치해야 합니다.
+
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-const http = require('http'); // 1. http 모듈 추가
-const { Server } = require('socket.io'); // 2. Server 클래스 가져오기
-//const io = new Server(server);
+// ⚠️ Vercel 충돌 방지를 위해 Socket.IO 서버 모듈 대신 클라이언트 모듈을 사용합니다.
+const { io: SocketIOClient } = require("socket.io-client"); 
 
 const app = express();
-const server = http.createServer(app); // 3. app을 사용하여 HTTP 서버 생성
-const io = new Server(server, { // 4. 생성된 HTTP 서버에 Socket.IO 연결
-    cors: {
-        origin: "*", // 실제 환경에 맞게 조정 필요
-        methods: ["GET", "POST"]
-    }
-});
 
 const PORT = process.env.PORT || 5001;
 const MONGODB_URI = process.env.MONGODB_URI;
+// ⚠️ 별도로 배포된 웹소켓 서버의 주소를 .env에 설정해야 합니다. (예: https://your-socket-server.com)
+const SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL; 
+const projectRoot = path.join(__dirname, '..');
 
 
-// MONGODB_URI 확인 및 연결 (중복된 연결 로직 제거)
-if (!MONGODB_URI) {
-    console.error("오류: MONGODB_URI 환경 변수가 설정되지 않았습니다.");
-} else {
-    mongoose.connect(MONGODB_URI)
-        // serverSelectionTimeoutMS: 5000,
-        .then(() => console.log('✅ MongoDB connected successfully'))
-        .catch(err => console.error('❌ MongoDB connection error:', err.message));
+// ===== MongoDB 연결 캐싱 로직 (서버리스 충돌 방지) =====
+let isConnected = false;
+
+async function connectToDatabase() {
+    if (isConnected) {
+        // 기존 연결 재사용
+        return;
+    }
+    if (!MONGODB_URI) {
+        console.error("오류: MONGODB_URI 환경 변수가 설정되지 않았습니다.");
+        throw new Error("MONGODB_URI is not set.");
+    }
+    try {
+        await mongoose.connect(MONGODB_URI);
+        isConnected = true;
+        console.log('✅ MongoDB connected successfully.');
+    } catch (err) {
+        console.error('❌ MongoDB connection error:', err.message);
+        throw new Error("MongoDB 연결 실패");
+    }
 }
 
+// ===== 웹소켓 서버로 알림 전송 함수 =====
+function emitToSocketServer(event, data) {
+    if (!SOCKET_SERVER_URL) {
+        console.warn("경고: SOCKET_SERVER_URL이 설정되지 않아 실시간 알림을 보낼 수 없습니다.");
+        return;
+    }
+    try {
+        // 서버리스 환경에 최적화된 클라이언트 연결 방식
+        const socketClient = SocketIOClient(SOCKET_SERVER_URL, {
+             transports: ['websocket'], 
+             forceNew: true 
+        });
+        socketClient.emit(event, data);
+        socketClient.disconnect(); // 메시지 전송 후 즉시 연결 해제
+    } catch (error) {
+        console.error("Socket.IO 클라이언트 전송 오류:", error);
+    }
+}
 
 // Middleware
 app.use(express.json());
 app.use(cors());
-const projectRoot = path.join(__dirname, '..');
-app.use(express.static(projectRoot));
 
-// 정적 파일 서빙 경로 설정
-app.use(express.static(path.join(__dirname, '..', 'public')));
-app.use(express.static(projectRoot)); // projectRoot에 있는 파일들 (예: index.html)
+// 정적 파일 서빙 경로 설정 (CSS 파일 적용 문제 해결)
+app.use(express.static(projectRoot)); // index.html, style.css 등 루트 파일
+app.use(express.static(path.join(projectRoot, 'public'))); // output.css (Tailwind 결과물)
 
-// Socket.IO Connection
-io.on('connection', (socket) => {
-    console.log('✅ Socket.IO: 새로운 사용자 연결됨 (' + socket.id + ')');
-    socket.on('disconnect', () => {
-        console.log('❌ Socket.IO: 사용자 연결 해제됨 (' + socket.id + ')');
-    });
-    // 추가적인 socket 이벤트 처리 로직 (예: 실시간 순위표 업데이트 등)
+// API 요청 시에만 DB 연결 시도 (미들웨어)
+app.use('/api', async (req, res, next) => {
+    try {
+        await connectToDatabase();
+        next();
+    } catch (error) {
+        console.error('API 요청 전 DB 연결 실패:', error.message);
+        res.status(503).send('Database connection unavailable.');
+    }
 });
 
-
-// ===== Schemas and Models (점수 필드 제거) =====
-
+// ===== Schemas and Models (점수 필드 제거됨) =====
 const UserSchema = new mongoose.Schema({
     name: { type: String, required: true, unique: true },
-    // score 필드 제거 ------------------
     isAdmin: { type: Boolean, default: false },
 });
 
 const ProblemSchema = new mongoose.Schema({
-    date: { type: String, required: true, unique: true }, // YYYY-MM-DD 형식의 날짜
-    // question 필드는 문제 내용, 이미지, 선택지 목록을 JSON 문자열로 저장
+    date: { type: String, required: true, unique: true }, 
     question: { type: String, required: true }, 
-    answer: { type: Number, required: true }, // 정답 선택지의 인덱스 (1부터 시작)
+    answer: { type: Number, required: true }, 
     solvers: [{
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         name: { type: String, required: true },
@@ -77,53 +101,43 @@ const User = mongoose.model('User', UserSchema);
 const Problem = mongoose.model('Problem', ProblemSchema);
 
 // ===== Routes =====
-// 정적 파일 서빙 경로 설정 (클라이언트 HTML/CSS/JS)
-// 이미 위에 전역으로 설정했으나, 명시적 라우팅도 추가 (선택 사항)
-// app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
+// 루트 요청 (index.html 제공)
 app.get('/', (req, res) => {
     res.sendFile(path.join(projectRoot, 'index.html'));
 });
 
 // 1. User Login/Registration
+// (User.js 파일이 없으므로, 편의상 name을 이용한 간단한 upsert 로직을 사용)
 app.post('/api/users/login', async (req, res) => {
     try {
         const { name } = req.body;
-
-        if (!name || name.trim() === '') {
-            return res.status(400).send('사용자 이름은 필수입니다.');
-        }
+        if (!name) return res.status(400).send('이름을 입력해주세요.');
 
         let user = await User.findOne({ name });
-
         if (!user) {
-            // New user registration
-            user = new User({ name, isAdmin: false });
+            // 사용자가 없으면 회원가입 (생성)
+            user = new User({ name });
             await user.save();
         }
+        res.status(200).json({ success: true, user });
 
-        // Existing user login
-        res.status(200).json({
-            _id: user._id, 
-            name: user.name, 
-            isAdmin: user.isAdmin
-        });
     } catch (error) {
-        console.error('사용자 로그인/등록 중 DB 오류:', error);
-        res.status(500).send('사용자 처리 중 오류 발생');
+        console.error("로그인/회원가입 실패:", error);
+        res.status(500).send('로그인 처리 실패');
     }
 });
 
-// 2. Get All Users (for leaderboard) - **점수 로직 제거되었으므로 순위표는 이 데이터만으로는 불가능**
+
+// 2. Get All Users (for leaderboard)
 app.get('/api/users', async (req, res) => {
     try {
         const users = await User.find({});
-
+        // 점수 로직 제거되었으므로, 기본 사용자 정보만 반환
         const cleanedUsers = users.map(user => ({
             _id: user._id,
             name: user.name,
             isAdmin: user.isAdmin
-            // score 필드 응답에서 제거
         }));
 
         res.status(200).json(cleanedUsers);
@@ -136,7 +150,7 @@ app.get('/api/users', async (req, res) => {
 // 3. Get Specific User (for status update)
 app.get('/api/users/:userId', async (req, res) => {
     try {
-        const user = await User.findById(req.params.userId).select('-score'); // score 필드 제외
+        const user = await User.findById(req.params.userId); 
         if (!user) {
             return res.status(404).send('사용자를 찾을 수 없습니다.');
         }
@@ -182,10 +196,8 @@ app.post('/api/admin/auth', (req, res) => {
         const { id, password } = req.body;
 
         if (id === process.env.ADMIN_ID && password === process.env.ADMIN_PASSWORD) {
-            // 인증 성공 시 응답
             res.status(200).json({ success: true, isAdmin: true });
         } else {
-            // 인증 실패
             res.status(401).json({ success: false, message: '인증 실패' });
         }
     } catch (error) {
@@ -202,18 +214,16 @@ app.post('/api/problems', async (req, res) => {
         
         const newProblem = new Problem({
             date,
-            // question은 객체 형태로 오므로, DB 저장을 위해 JSON 문자열로 변환
             question: JSON.stringify(question),
             answer: Number(answer),
             creatorId
         });
 
-        // 문제 데이터를 DB에 저장
         await newProblem.save();
 
-        io.emit('new_problem', newProblem); // Socket.IO로 새로운 문제 알림
+        // ⚠️ Socket.IO 클라이언트로 알림 전송 (이벤트명: api_new_problem)
+        emitToSocketServer('api_new_problem', newProblem); 
         
-        // 저장 성공 응답
         res.status(201).json({ success: true, problem: newProblem });
 
     } catch (error) {
@@ -237,13 +247,11 @@ app.get('/api/problems', async (req, res) => {
                 problemObject.question = JSON.parse(problemObject.question);
             } catch (e) {
                 console.error("Failed to parse problem question:", e);
-                // 파싱 실패 시 기본값 설정
                 problemObject.question = { text: "JSON 파싱 오류", image: null, options: [] };
             }
             return problemObject;
         });
 
-        // 파싱된 문제 목록 응답
         res.json(parsedProblems);
 
     } catch (error) {
@@ -263,8 +271,8 @@ app.delete('/api/problems/id/:problemId', async (req, res) => {
             return res.status(404).send('해당 문제를 찾을 수 없습니다.');
         }
 
-        // 문제 삭제 시 실시간 알림 (선택 사항)
-        io.emit('problem_deleted', problemId); 
+        // ⚠️ Socket.IO 클라이언트로 알림 전송 (이벤트명: api_problem_deleted)
+        emitToSocketServer('api_problem_deleted', problemId); 
 
         res.status(200).send('문제 삭제 완료');
     } catch (error) {
@@ -273,7 +281,7 @@ app.delete('/api/problems/id/:problemId', async (req, res) => {
     }
 });
 
-// 9. Solve Problem (점수 로직 제거)
+// 9. Solve Problem
 app.post('/api/problems/:problemId/solve', async (req, res) => {
     const { problemId } = req.params;
     const { userId, selectedOption } = req.body; 
@@ -286,7 +294,6 @@ app.post('/api/problems/:problemId/solve', async (req, res) => {
             return res.status(404).send('문제 또는 사용자를 찾을 수 없습니다.');
         }
 
-        // 이미 푼 사용자인지 확인
         const alreadySolved = problem.solvers.some(s => s.userId.toString() === userId);
         if (alreadySolved) {
             return res.status(400).send('이미 이 퀴즈를 풀었습니다.');
@@ -294,7 +301,6 @@ app.post('/api/problems/:problemId/solve', async (req, res) => {
 
         const isCorrect = problem.answer === Number(selectedOption);
 
-        // 문제의 solvers 목록 업데이트
         problem.solvers.push({
             userId,
             name: user.name,
@@ -302,18 +308,17 @@ app.post('/api/problems/:problemId/solve', async (req, res) => {
         });
         const updatedProblem = await problem.save();
 
-        // 실시간으로 풀이 결과 알림
-        io.emit('problem_solved', {
+        // ⚠️ Socket.IO 클라이언트로 알림 전송 (이벤트명: api_problem_solved)
+        emitToSocketServer('api_problem_solved', {
             problemId: problem._id,
             solverName: user.name,
             isCorrect: isCorrect
         });
 
-        // 클라이언트에서 필요한 정보만 응답
         res.status(200).json({ 
             success: true, 
             isCorrect, 
-            updatedProblem: updatedProblem // 업데이트된 문제 객체를 클라이언트에 반환
+            updatedProblem: updatedProblem 
         });
 
     } catch (error) {
@@ -327,12 +332,14 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(projectRoot, 'index.html'));
 });
 
-// Vercel deployment requires the handler to be exported
-//module.exports = app;
 
-// Local development server setup (Vercel 환경이 아닌 경우에만 서버 리스닝)
+// Vercel deployment requires the handler to be exported
+module.exports = app;
+
+// Local development server setup 
 if (!process.env.VERCEL) {
-    server.listen(PORT, () => {
+    // ⚠️ 서버리스 충돌 방지를 위해 server.listen이 아닌 app.listen을 사용합니다.
+    app.listen(PORT, () => {
         console.log(`🚀 Server is running on port ${PORT}`);
     });
 }

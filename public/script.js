@@ -1,4 +1,6 @@
-const socket = io();
+const API_BASE_URL = window.location.origin;
+const SOCKET_SERVER_URL = "https://socket-l4t0.onrender.com";
+const socket = io(SOCKET_SERVER_URL);
 let allProblems = [];
 let problems = [];
 let currentUser = null;

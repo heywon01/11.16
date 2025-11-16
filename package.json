@@ -7,7 +7,8 @@
     "start": "node api/index.js",
     "dev": "nodemon api/index.js",
     "build": "npx tailwindcss -i ./input.css -o ./public/output.css --minify",
-    "build-css": "npx tailwindcss -i ./input.css -o ./public/output.css",
+    
+    "build-css": "npx tailwindcss -i ./input.css -o ./public/output.css", 
     "watch-css": "npx tailwindcss -i ./input.css -o ./public/output.css --watch"
   },
   "dependencies": {
@@ -15,7 +16,7 @@
     "dotenv": "^16.6.1",
     "express": "^4.19.2",
     "mongoose": "^8.4.1",
-    "socket.io": "^4.8.1"
+    "socket.io-client": "^4.x.x" 
   },
   "devDependencies": {
     "autoprefixer": "^10.4.22",

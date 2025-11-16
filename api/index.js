@@ -3,14 +3,27 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const { createServer } = require('http'); // HTTP 서버 모듈 추가
+const { Server } = require('socket.io');
 
+const projectRoot = path.join(__dirname, '..');
+
+app.use(express.static(path.join(projectRoot, 'public')));
+
+app.use(express.static(projectRoot));
 const http = require('http');
-const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5001;
 const MONGODB_URI = process.env.MONGODB_URI;
+const httpServer = createServer(app); // 1. Express 앱을 HTTP 서버에 연결
+const io = new Server(httpServer, {
+    cors: {
+        origin: "*", // 배포 환경에 따라 보안이슈가 없다면 모두 허용
+        methods: ["GET", "POST"]
+    }
+});
 
 mongoose.connect(process.env.MONGODB_URI, {
     serverSelectionTimeoutMS: 5000,
@@ -27,13 +40,6 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(express.static(path.join(__dirname, '..', '')));
-
-const io = new Server(server, {
-    cors: {
-        origin: "*", // 모든 도메인 허용. 배포 시 특정 도메인으로 변경 권장
-        methods: ["GET", "POST"]
-    }
-});
 
 io.on('connection', (socket) => {
   console.log('✅ Socket.IO: 새로운 사용자 연결됨 (' + socket.id + ')');
@@ -80,15 +86,9 @@ const ProblemSchema = new mongoose.Schema({
 const User = mongoose.model('User', UserSchema); 
 const Problem = mongoose.model('Problem', ProblemSchema);
 
-const projectRoot = path.join(__dirname, '..');
-
 // ===== Routes =====
 // 정적 파일 서빙 경로 설정 (클라이언트 HTML/CSS/JS)
 app.use('/public', express.static(path.join(__dirname, '..', 'public')));
-
-app.use(express.static(path.join(projectRoot, 'public')));
-
-app.use(express.static(projectRoot));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'index.html'));
@@ -322,6 +322,9 @@ app.post('/api/problems/:problemId/solve', async (req, res) => {
         console.error("Solve error:", error);
         res.status(500).send('퀴즈 제출 실패');
     }
+});
+app.get('*', (req, res) => {
+    res.sendFile(path.join(projectRoot, 'index.html'));
 });
 
 // Vercel deployment requires the handler to be exported

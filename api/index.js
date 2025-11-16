@@ -3,43 +3,26 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-const { createServer } = require('http'); // HTTP 서버 모듈 추가
 const { Server } = require('socket.io');
-
-const projectRoot = path.join(__dirname, '..');
-
-app.use(express.static(path.join(projectRoot, 'public')));
-
-app.use(express.static(projectRoot));
-const http = require('http');
 
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5001;
 const MONGODB_URI = process.env.MONGODB_URI;
 const httpServer = createServer(app); // 1. Express 앱을 HTTP 서버에 연결
-const io = new Server(httpServer, {
-    cors: {
-        origin: "*", // 배포 환경에 따라 보안이슈가 없다면 모두 허용
-        methods: ["GET", "POST"]
-    }
-});
+const projectRoot = path.join(__dirname, '..');
 
-mongoose.connect(process.env.MONGODB_URI, {
-    serverSelectionTimeoutMS: 5000,
-})
-.then(() => {
-    console.log('MongoDB connected successfully.'); // Vercel 로그에서 이 메시지를 확인해야 합니다.
-})
-.catch(err => {
-    console.error('MongoDB connection error:', err); // 오류 발생 시 출력
-});
+mongoose.connect(MONGODB_URI)
+    //serverSelectionTimeoutMS: 5000,
+    .then(() => console.log('MongoDB connected successfully'))
+    .catch(err => console.error('MongoDB connection error:', err.message));
 
 // Middleware
 app.use(express.json());
 app.use(cors());
+
 app.use(express.static(path.join(__dirname, '..', 'public')));
-app.use(express.static(path.join(__dirname, '..', '')));
+app.use(express.static(projectRoot));
 
 io.on('connection', (socket) => {
   console.log('✅ Socket.IO: 새로운 사용자 연결됨 (' + socket.id + ')');

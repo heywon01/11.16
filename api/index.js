@@ -18,7 +18,7 @@ const io = new Server(server, { // 4. 생성된 HTTP 서버에 Socket.IO 연결
 
 const PORT = process.env.PORT || 5001;
 const MONGODB_URI = process.env.MONGODB_URI;
-const projectRoot = path.join(__dirname, '..');
+
 
 // MONGODB_URI 확인 및 연결 (중복된 연결 로직 제거)
 if (!MONGODB_URI) {
@@ -34,6 +34,7 @@ if (!MONGODB_URI) {
 // Middleware
 app.use(express.json());
 app.use(cors());
+const projectRoot = path.join(__dirname, '..');
 app.use(express.static(projectRoot));
 
 // 정적 파일 서빙 경로 설정
@@ -327,7 +328,7 @@ app.get('*', (req, res) => {
 });
 
 // Vercel deployment requires the handler to be exported
-module.exports = app;
+//module.exports = app;
 
 // Local development server setup (Vercel 환경이 아닌 경우에만 서버 리스닝)
 if (!process.env.VERCEL) {

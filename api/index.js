@@ -8,16 +8,25 @@ const http = require('http');
 const { Server } = require("socket.io");
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 5001;
 const MONGODB_URI = process.env.MONGODB_URI;
+
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+.then(() => {
+    console.log('MongoDB connected successfully.'); // Vercel 로그에서 이 메시지를 확인해야 합니다.
+})
+.catch(err => {
+    console.error('MongoDB connection error:', err); // 오류 발생 시 출력
+});
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname, '..', 'public')));
-
-
-const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {

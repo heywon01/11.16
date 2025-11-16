@@ -24,6 +24,10 @@
       "src": "/(.*\\.(?:js|css|ico|svg))", 
       "dest": "/public/$1"
     },
+    {
+      "src": "/style.css",
+      "dest": "/public/style.css"
+    },
     
     {
       "src": "/api/(.*)",

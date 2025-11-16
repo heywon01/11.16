@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5001;
 const MONGODB_URI = process.env.MONGODB_URI;
 // ⚠️ 별도로 배포된 웹소켓 서버의 주소를 .env에 설정해야 합니다. (예: https://your-socket-server.com)
 const SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL; 
-const projectRoot = path.join(__dirname, '..');
+
 
 
 // ===== MongoDB 연결 캐싱 로직 (서버리스 충돌 방지) =====
@@ -61,6 +61,7 @@ app.use(express.json());
 app.use(cors());
 
 // 정적 파일 서빙 경로 설정 (CSS 파일 적용 문제 해결)
+const projectRoot = path.join(__dirname, '..');
 app.use('/public', express.static(path.join(projectRoot, 'public')));
 app.use(express.static(projectRoot));
 

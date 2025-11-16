@@ -5,3 +5,11 @@ netstat -ano | findstr :4000
 taskkill /PID (프로세스id) /F
 
 https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap
+
+git add .
+
+git commit -m "Final critical fix: Corrected Express static path and Socket.IO CDN link"
+
+vercel --prod
+
+git push origin main

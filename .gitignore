@@ -16,5 +16,4 @@
 *.log
 .vercel
 
-# .gitignore
-/node_modules
+

@@ -8,7 +8,7 @@ https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=s
 
 git add .
 
-ggit commit -m "Configure vercel.json to route root path (/) to Express serverless function"
+git commit -m "Configure vercel.json to route root path (/) to Express serverless function"
 
 vercel --prod
 

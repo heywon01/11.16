@@ -33,34 +33,34 @@ async function connectToDatabase() {
         isConnected = true;
         console.log('✅ MongoDB connected successfully.');
     } catch (err) {
-        console.error('❌ MongoDB connection error:', err.message);
-        throw new Error("MongoDB 연결 실패");
+        console.error('❌ MongoDB connection error:', err);
+        isConnected = false;
         throw err;
     }
 }
 
+let socket = null;
+if (SOCKET_SERVER_URL) {
+}
+
 // ===== 웹소켓 서버로 알림 전송 함수 =====
 function emitToSocketServer(event, data) {
-    if (!SOCKET_SERVER_URL) {
-        console.warn("경고: SOCKET_SERVER_URL이 설정되지 않아 실시간 알림을 보낼 수 없습니다.");
-        return;
-    }
-    try {
-        // 서버리스 환경에 최적화된 클라이언트 연결 방식
-        const socketClient = SocketIOClient(SOCKET_SERVER_URL, {
-             transports: ['websocket'], 
-             forceNew: true 
-        });
-        socketClient.emit(event, data);
-        socketClient.disconnect(); // 메시지 전송 후 즉시 연결 해제
-    } catch (error) {
-        console.error("Socket.IO 클라이언트 전송 오류:", error);
+    if (socket) {
+        socket.emit(event, data);
     }
 }
 
 // Middleware
 app.use(express.json());
 app.use(cors());
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(projectRoot, 'index.html'));
+});
+
+app.get('/favicon.ico', (req, res) => {
+    res.sendFile(path.join(projectRoot, 'favicon.ico'));
+});
 
 // 정적 파일 서빙 경로 설정 (CSS 파일 적용 문제 해결)
 app.use('/public', express.static(path.join(projectRoot, 'public')));
@@ -184,103 +184,104 @@ app.put('/api/users/:userId', async (req, res) => {
     }
 });
 
-// 5. Admin Authentication
-app.post('/api/admin/auth', (req, res) => {
+app.post('/api/users', async (req, res) => {
     try {
-        const { id, password } = req.body;
-
-        if (id === process.env.ADMIN_ID && password === process.env.ADMIN_PASSWORD) {
-            res.status(200).json({ success: true, isAdmin: true });
-        } else {
-            res.status(401).json({ success: false, message: '인증 실패' });
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).send('이름을 입력해주세요.');
         }
+
+        let user = await User.findOne({ name });
+        if (!user) {
+            user = new User({ name });
+            await user.save();
+        }
+        
+        res.status(200).json({ 
+            _id: user._id, 
+            name: user.name, 
+            isAdmin: user.isAdmin,
+            createdAt: user.createdAt 
+        });
+
     } catch (error) {
-        console.error('관리자 인증 중 오류 발생:', error);
-        res.status(500).send('관리자 인증 중 오류 발생');
+        console.error("User registration/login error:", error);
+        res.status(500).send('사용자 처리 실패');
     }
 });
 
+// 관리자 인증
+app.post('/api/admin/auth', adminAuth, (req, res) => {
+    res.status(200).json({ success: true, message: 'Admin authenticated' });
+});
 
-// 6. Add New Problem (Admin only)
-app.post('/api/problems', async (req, res) => {
+// 문제 추가 (관리자 권한 필요)
+app.post('/api/problems', adminAuth, async (req, res) => {
     try {
-        const { date, question, answer, creatorId } = req.body;
+        const { date, question, creatorId } = req.body;
         
-        const newProblem = new Problem({
-            date,
-            question: JSON.stringify(question),
-            answer: Number(answer),
-            creatorId
+        if (!date || !question || !question.text || !question.options || question.answer === undefined || !creatorId) {
+            return res.status(400).send('필수 입력 항목이 누락되었습니다.');
+        }
+        
+        const newProblem = new Problem({ 
+            date: new Date(date), 
+            question, 
+            creatorId 
         });
-
         await newProblem.save();
 
-        // ⚠️ Socket.IO 클라이언트로 알림 전송 (이벤트명: api_new_problem)
-        emitToSocketServer('api_new_problem', newProblem); 
-        
-        res.status(201).json({ success: true, problem: newProblem });
-
+        res.status(201).json(newProblem);
     } catch (error) {
-        if (error.code === 11000) {
-            return res.status(400).send('해당 날짜에 이미 문제가 존재합니다.');
-        }
-        console.error("문제 추가 실패:", error);
-        res.status(500).send('문제 추가 실패');
+        console.error("Problem creation error:", error);
+        res.status(500).send('문제 생성 실패');
     }
 });
 
-// 7. Get All Problems
+// 문제 목록 조회 (날짜 기준)
 app.get('/api/problems', async (req, res) => {
     try {
-        const problems = await Problem.find({});
-        
-        const parsedProblems = problems.map(p => {
-            const problemObject = p.toObject();
-            try {
-                // DB에서 JSON 문자열로 저장된 question 필드를 파싱
-                problemObject.question = JSON.parse(problemObject.question);
-            } catch (e) {
-                console.error("Failed to parse problem question:", e);
-                problemObject.question = { text: "JSON 파싱 오류", image: null, options: [] };
-            }
-            return problemObject;
-        });
+        const problemsList = await Problem.find({})
+            .sort({ date: 1, createdAt: 1 })
+            .populate('creatorId', 'name')
+            .lean(); 
 
-        res.json(parsedProblems);
-
+        res.status(200).json(problemsList);
     } catch (error) {
-        console.error('문제 목록 조회 실패:', error);
-        res.status(500).send('문제 목록을 가져올 수 없습니다.');
+        console.error("Fetch problems error:", error);
+        res.status(500).send('문제 목록 조회 실패');
     }
 });
 
-// 8. Delete Problem (Admin only)
-app.delete('/api/problems/id/:problemId', async (req, res) => { 
+// 문제 목록 조회 (날짜 기준)
+app.get('/api/problems/:id', async (req, res) => {
     try {
-        const { problemId } = req.params;
+        const problemId = req.params.id;
+        const problem = await Problem.findById(problemId)
+            .populate('creatorId', 'name')
+            .lean();
 
-        const result = await Problem.deleteOne({ _id: problemId });
-
-        if (result.deletedCount === 0) {
-            return res.status(404).send('해당 문제를 찾을 수 없습니다.');
+        if (!problem) {
+            return res.status(404).send('문제를 찾을 수 없습니다.');
         }
 
-        // ⚠️ Socket.IO 클라이언트로 알림 전송 (이벤트명: api_problem_deleted)
-        emitToSocketServer('api_problem_deleted', problemId); 
-
-        res.status(200).send('문제 삭제 완료');
+        res.status(200).json(problem);
     } catch (error) {
-        console.error('문제 삭제 실패:', error);
-        res.status(500).send('문제 삭제 실패');
+        console.error("Fetch problem by ID error:", error);
+        res.status(500).send('문제 조회 실패');
     }
 });
 
-// 9. Solve Problem
-app.post('/api/problems/:problemId/solve', async (req, res) => {
-    const { problemId } = req.params;
-    const { userId, selectedOption } = req.body; 
-
+// 퀴즈 제출 (정답 확인 및 기록)
+app.post('/api/problems/:id/solve', async (req, res) => {
     try {
+        const problemId = req.params.id;
+        const { userId, selectedOption } = req.body;
+
+        if (!userId || selectedOption === undefined) {
+            return res.status(400).send('사용자 정보 또는 선택된 답이 누락되었습니다.');
+        }
+
         const problem = await Problem.findById(problemId);
         const user = await User.findById(userId);
 
@@ -293,7 +294,7 @@ app.post('/api/problems/:problemId/solve', async (req, res) => {
             return res.status(400).send('이미 이 퀴즈를 풀었습니다.');
         }
 
-        const isCorrect = problem.answer === Number(selectedOption);
+        const isCorrect = problem.question.answer === Number(selectedOption);
 
         problem.solvers.push({
             userId,
@@ -302,7 +303,7 @@ app.post('/api/problems/:problemId/solve', async (req, res) => {
         });
         const updatedProblem = await problem.save();
 
-        // ⚠️ Socket.IO 클라이언트로 알림 전송 (이벤트명: api_problem_solved)
+        // Socket.IO 클라이언트로 알림 전송 (외부 웹소켓 서버를 사용한다고 가정)
         emitToSocketServer('api_problem_solved', {
             problemId: problem._id,
             solverName: user.name,
@@ -318,6 +319,47 @@ app.post('/api/problems/:problemId/solve', async (req, res) => {
     } catch (error) {
         console.error("Solve error:", error);
         res.status(500).send('퀴즈 제출 실패');
+    }
+});
+
+// 사용자 목록 조회 (관리자용)
+app.get('/api/users/all', async (req, res) => {
+    try {
+        const users = await User.find({}).sort({ createdAt: -1 });
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("Fetch users error:", error);
+        res.status(500).send('사용자 목록 조회 실패');
+    }
+});
+
+// 사용자 목록 조회 (관리자용)
+app.get('/api/users/all', async (req, res) => {
+    try {
+        const users = await User.find({}).sort({ createdAt: -1 });
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("Fetch users error:", error);
+        res.status(500).send('사용자 목록 조회 실패');
+    }
+});
+
+// 사용자 정보 수정 (관리자용)
+app.put('/api/users/:id', adminAuth, async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const updates = req.body; // { name, isAdmin }
+        
+        const updatedUser = await User.findByIdAndUpdate(userId, updates, { new: true });
+
+        if (!updatedUser) {
+            return res.status(404).send('사용자를 찾을 수 없습니다.');
+        }
+        
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        console.error("Update user error:", error);
+        res.status(500).send('사용자 정보 수정 실패');
     }
 });
 

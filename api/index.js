@@ -73,26 +73,23 @@ app.use('/api', async (req, res, next) => {
 });
 
 // ===== Schemas and Models (점수 필드 제거됨) =====
-const UserSchema = new mongoose.Schema({
-    name: { type: String, required: true, unique: true },
-    isAdmin: { type: Boolean, default: false },
-});
+//const UserSchema = new mongoose.Schema({
+    //name: { type: String, required: true, unique: true },
+    //isAdmin: { type: Boolean, default: false },
+//});
 
-const ProblemSchema = new mongoose.Schema({
-    date: { type: String, required: true, unique: true }, 
-    question: { type: String, required: true }, 
-    answer: { type: Number, required: true }, 
-    solvers: [{
-        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-        name: { type: String, required: true },
-        isCorrect: { type: Boolean, required: true },
-        solvedAt: { type: Date, default: Date.now }
-    }],
-    createdAt: { type: Date, default: Date.now }
-});
-
-const User = mongoose.model('User', UserSchema); 
-const Problem = mongoose.model('Problem', ProblemSchema);
+//const ProblemSchema = new mongoose.Schema({
+    //date: { type: String, required: true, unique: true }, 
+    //question: { type: String, required: true }, 
+    //answer: { type: Number, required: true }, 
+    //solvers: [{
+        //userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        //name: { type: String, required: true },
+        //isCorrect: { type: Boolean, required: true },
+        //solvedAt: { type: Date, default: Date.now }
+    //}],
+    //createdAt: { type: Date, default: Date.now }
+//});
 
 // ===== Routes =====
 

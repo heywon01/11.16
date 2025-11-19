@@ -5,6 +5,8 @@ const cors = require('cors');
 const path = require('path');
 // ⚠️ Vercel 충돌 방지를 위해 Socket.IO 서버 모듈 대신 클라이언트 모듈을 사용합니다.
 const { io: SocketIOClient } = require("socket.io-client"); 
+const Problem = require('./models/Problem');
+const User = require('./models/User');
 
 const app = express();
 
@@ -20,7 +22,6 @@ let isConnected = false;
 
 async function connectToDatabase() {
     if (isConnected) {
-        // 기존 연결 재사용
         return;
     }
     if (!MONGODB_URI) {
@@ -34,6 +35,7 @@ async function connectToDatabase() {
     } catch (err) {
         console.error('❌ MongoDB connection error:', err.message);
         throw new Error("MongoDB 연결 실패");
+        throw err;
     }
 }
 

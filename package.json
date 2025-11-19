@@ -8,8 +8,7 @@
     "dev": "nodemon api/index.js",
     "build": "npx tailwindcss -i ./input.css -o ./public/output.css --minify",
     "build-css": "npx tailwindcss -i ./input.css -o ./public/output.css", 
-    "watch-css": "npx tailwindcss -i ./input.css -o ./public/output.css --watch",
-    "postinstall": "npm run build"
+    "watch-css": "npx tailwindcss -i ./input.css -o ./public/output.css --watch"
   },
   "dependencies": {
     "cors": "^2.8.5",

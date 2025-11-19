@@ -7,15 +7,16 @@
     "start": "node api/index.js",
     "dev": "nodemon api/index.js",
     "build": "npx tailwindcss -i ./input.css -o ./public/output.css --minify",
-    "build-css": "npx tailwindcss -i ./input.css -o ./public/output.css", 
+    "build-css": "npx tailwindcss -i ./input.css -o ./public/output.css",
     "watch-css": "npx tailwindcss -i ./input.css -o ./public/output.css --watch"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.19.2",
+    "mongodb": "^7.0.0",
     "mongoose": "^8.4.1",
-    "socket.io-client": "^4.x.x" 
+    "socket.io-client": "^4.x.x"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.22",

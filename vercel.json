@@ -11,6 +11,13 @@
     }
   ],
   "routes": [
-    { "source": "/", "destination": "/public/index.html" }
+    {
+      "src": "/api/(.*)",
+      "dest": "api/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
   ]
 }

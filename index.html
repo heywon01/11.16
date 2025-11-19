@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>수학 문제</title>
-    <link href="/public/output.css" rel="stylesheet"> 
+    <link href="./public/output.css" rel="stylesheet"> 
 
-    <link href="/style.css" rel="stylesheet">
-    <link rel="icon" href="/favicon.ico">
+    <link href="./style.css" rel="stylesheet">
+    <link rel="icon" href="./favicon.ico">
 </head>
 <body class="bg-gray-100 text-gray-800">
     
@@ -56,7 +56,7 @@
 
         <div id="main-app-screen" class="hidden flex-grow flex flex-col">
             <header class="flex justify-between items-center py-4 border-b-2 border-indigo-100">
-                <h1 class="text-4xl font-extrabold text-indigo-600 tracking-tight">Quiz Mate</h1>
+                <h1 class="text-4xl font-extrabold text-indigo-600 tracking-tight">수학문제</h1>
                 <div class="flex items-center space-x-4">
                     <span id="welcome-message" class="text-lg font-medium text-gray-700">환영합니다, <span id="current-user-name" class="font-bold"></span>님!</span>
                     <button id="admin-mode-toggle" class="bg-yellow-500 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-yellow-600 transition hidden">
@@ -152,12 +152,12 @@
                         </div>
 
                         <div>
-                            <label for="question-text" class="block text-sm font-medium text-gray-700">질문 내용</label>
+                            <label for="question-text" class="block text-sm font-medium text-gray-700">문제 내용</label>
                             <textarea id="question-text" rows="3" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                         </div>
 
                         <div>
-                            <label for="question-image" class="block text-sm font-medium text-gray-700">질문 이미지 (선택 사항)</label>
+                            <label for="question-image" class="block text-sm font-medium text-gray-700">문제 이미지</label>
                             <input type="file" id="question-image" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                             <img id="image-preview" class="mt-4 max-h-40 hidden rounded-lg shadow-md" alt="Image Preview">
                         </div>
@@ -228,6 +228,6 @@
     </div>
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script> 
-    <script src="/script.js"></script>
+    <script src="./script.js"></script>
 </body>
 </html>

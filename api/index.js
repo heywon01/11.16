@@ -96,11 +96,6 @@ const Problem = mongoose.model('Problem', ProblemSchema);
 
 // ===== Routes =====
 
-// 루트 요청 (index.html 제공)
-app.get('/', (req, res) => {
-    res.sendFile(path.join(projectRoot, 'index.html'));
-});
-
 // 1. User Login/Registration
 // (User.js 파일이 없으므로, 편의상 name을 이용한 간단한 upsert 로직을 사용)
 app.post('/api/users/login', async (req, res) => {
@@ -365,7 +360,12 @@ app.put('/api/users/:id', adminAuth, async (req, res) => {
 
 // Fallback: Catch-all 라우팅 (index.html 제공)
 app.get('*', (req, res) => {
-    res.sendFile(path.join(projectRoot, 'index.html'));
+    if (!req.path.startsWith('/api/') && !req.path.startsWith('/public/')) { 
+        res.sendFile(path.join(projectRoot, 'index.html'));
+    } else {
+        // 이미 처리되었어야 하는 요청이 여기에 도달하면 404를 반환합니다.
+        res.status(404).send('Not Found');
+    }
 });
 
 

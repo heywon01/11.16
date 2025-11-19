@@ -5,8 +5,8 @@ const cors = require('cors');
 const path = require('path');
 // ⚠️ Vercel 충돌 방지를 위해 Socket.IO 서버 모듈 대신 클라이언트 모듈을 사용합니다.
 const { io: SocketIOClient } = require("socket.io-client"); 
-const Problem = require('./models/Problem');
-const User = require('./models/User');
+const Problem = require('../models/problem');
+const User = require('../models/User');
 
 const app = express();
 
@@ -368,6 +368,10 @@ app.get('*', (req, res) => {
     }
 });
 
+app.use((err, req, res, next) => {
+    console.error("Express App Critical Error:", err.stack); // 충돌 스택 추적을 로그에 기록
+    res.status(500).send('서버 오류: ' + err.message);
+});
 
 // Vercel deployment requires the handler to be exported
 module.exports = app;

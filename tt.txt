@@ -8,7 +8,7 @@ https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=s
 
 git add .
 
-git commit -m "Configure vercel.json to route root path (/) to Express serverless function"
+git commit -m "Fix: Correct module path for models in api/index.js"
 
 vercel --prod
 

@@ -11,6 +11,7 @@
     "watch-css": "npx tailwindcss -i ./input.css -o ./public/output.css --watch"
   },
   "dependencies": {
+    "@vercel/speed-insights": "^1.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.19.2",

@@ -15,9 +15,10 @@
     "script.js"
   ],
   "routes": [
-    {
-      "src": "/(.*)", 
-      "dest": "index.js"
-    }
+    { "src": "/public/(.*)", "dest": "/public/$1" },
+    { "src": "/favicon.ico", "dest": "/favicon.ico" },
+    { "src": "/style.css", "dest": "/style.css" },
+    { "src": "/script.js", "dest": "/script.js" },
+    { "src": "/(.*)", "dest": "index.js" }
   ]
 }

@@ -16,6 +16,18 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL; 
 const projectRoot = __dirname;
 
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'wj2112';
+
+const adminAuth = (req, res, next) => {
+    const { adminId, adminPassword } = req.body;
+
+    if (req.headers['x-admin-key'] === ADMIN_PASSWORD || (adminId === 'admin' && adminPassword === ADMIN_PASSWORD)) {
+        // req.user 등을 통해 사용자 정보가 관리자임을 인증하는 실제 로직 필요
+        next();
+    } else {
+        res.status(403).send('관리자 권한이 필요합니다.');
+    }
+};
 
 // ===== MongoDB 연결 캐싱 로직 (서버리스 충돌 방지) =====
 let isConnected = false;
@@ -45,7 +57,22 @@ if (SOCKET_SERVER_URL) {
 
 // ===== 웹소켓 서버로 알림 전송 함수 =====
 function emitToSocketServer(event, data) {
-    if (socket) {
+    if (!socket && SOCKET_SERVER_URL) {
+        try {
+             // 💡 요청이 발생했을 때만 연결 시도 (최적의 서버리스 방식)
+             socket = SocketIOClient(SOCKET_SERVER_URL, {
+                // 필요하다면 추가 설정
+             });
+             socket.on('connect', () => console.log('Socket client connected.'));
+             socket.on('connect_error', (err) => console.error('Socket connection error:', err));
+        } catch (error) {
+             console.error("Failed to connect Socket client:", error);
+             // 연결 실패 시 함수 종료
+             return; 
+        }
+    }
+
+    if (socket && socket.connected) { // 연결 성공 시에만 emit
         socket.emit(event, data);
     }
 }

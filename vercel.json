@@ -8,17 +8,18 @@
   ],
   "files": [
     "index.js",
-    "models/**/*",  
+    "models/**/*",
     "node_modules/**", 
     "index.html",
     "style.css",
-    "script.js"
+    "script.js",
+    "public/**/*", 
+    "favicon.ico" 
   ],
   "routes": [
-    { "src": "/public/(.*)", "dest": "/public/$1" },
-    { "src": "/favicon.ico", "dest": "/favicon.ico" },
-    { "src": "/style.css", "dest": "/style.css" },
-    { "src": "/script.js", "dest": "/script.js" },
-    { "src": "/(.*)", "dest": "index.js" }
+    {
+      "src": "/(.*)", 
+      "dest": "index.js"
+    }
   ]
 }

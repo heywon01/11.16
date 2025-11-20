@@ -5,8 +5,8 @@ const cors = require('cors');
 const path = require('path');
 // ⚠️ Vercel 충돌 방지를 위해 Socket.IO 서버 모듈 대신 클라이언트 모듈을 사용합니다.
 const { io: SocketIOClient } = require("socket.io-client"); 
-const Problem = require('./models/Problem.js');
-const User = require('./models/User.js');
+const Problem = require('./Problem.js');
+const User = require('./User.js');
 
 const app = express();
 
@@ -338,17 +338,6 @@ app.post('/api/problems/:id/solve', async (req, res) => {
     } catch (error) {
         console.error("Solve error:", error);
         res.status(500).send('퀴즈 제출 실패');
-    }
-});
-
-// 사용자 목록 조회 (관리자용)
-app.get('/api/users/all', async (req, res) => {
-    try {
-        const users = await User.find({}).sort({ createdAt: -1 });
-        res.status(200).json(users);
-    } catch (error) {
-        console.error("Fetch users error:", error);
-        res.status(500).send('사용자 목록 조회 실패');
     }
 });
 

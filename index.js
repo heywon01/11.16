@@ -5,7 +5,7 @@ const cors = require('cors');
 const path = require('path');
 // ⚠️ Vercel 충돌 방지를 위해 Socket.IO 서버 모듈 대신 클라이언트 모듈을 사용합니다.
 const { io: SocketIOClient } = require("socket.io-client"); 
-const Problem = require('./models/Problem.sj');
+const Problem = require('./models/Problem.js');
 const User = require('./models/User.js');
 
 const app = express();
@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5001;
 const MONGODB_URI = process.env.MONGODB_URI;
 // ⚠️ 별도로 배포된 웹소켓 서버의 주소를 .env에 설정해야 합니다. (예: https://your-socket-server.com)
 const SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL; 
-const projectRoot = path.join(__dirname, '..');
+const projectRoot = __dirname;
 
 
 // ===== MongoDB 연결 캐싱 로직 (서버리스 충돌 방지) =====

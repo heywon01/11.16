@@ -5,10 +5,8 @@ const cors = require('cors');
 const path = require('path');
 // ⚠️ Vercel 충돌 방지를 위해 Socket.IO 서버 모듈 대신 클라이언트 모듈을 사용합니다.
 const { io: SocketIOClient } = require("socket.io-client"); 
-//const Problem = require('../models/Problem.sj');
-//const User = require('../models/User.js');
-const Problem = require(path.join(projectRoot, 'models', 'Problem.js')); // 👈 절대 경로 구성
-const User = require(path.join(projectRoot, 'models', 'User.js'));
+const Problem = require('./models/Problem.sj');
+const User = require('./models/User.js');
 
 const app = express();
 

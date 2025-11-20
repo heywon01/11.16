@@ -81,17 +81,17 @@ function emitToSocketServer(event, data) {
 app.use(express.json());
 app.use(cors());
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(projectRoot, 'index.html'));
-});
-
-app.get('/favicon.ico', (req, res) => {
-    res.sendFile(path.join(projectRoot, 'favicon.ico'));
-});
-
 // 정적 파일 서빙 경로 설정 (CSS 파일 적용 문제 해결)
 app.use('/public', express.static(path.join(projectRoot, 'public')));
 app.use(express.static(projectRoot));
+
+app.get('*', (req, res) => {
+    if (req.path.startsWith('/api/')) {
+        res.status(404).send('Not Found');
+    } else {
+        res.sendFile(path.join(projectRoot, 'index.html'));
+    }
+});
 
 // API 요청 시에만 DB 연결 시도 (미들웨어)
 app.use('/api', async (req, res, next) => {

@@ -6,11 +6,15 @@
       "use": "@vercel/node"
     }
   ],
+  "files": [
+    "index.js",
+    "models/**/*",  
+    "node_modules/**", 
+    "index.html",
+    "style.css",
+    "script.js"
+  ],
   "routes": [
-    {
-      "src": "/(index.html|script.js|style.css|favicon.ico)", 
-      "dest": "/$1"
-    },
     {
       "src": "/(.*)", 
       "dest": "index.js"

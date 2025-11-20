@@ -8,8 +8,9 @@
   ],
   "files": [
     "index.js",
-    "models/**/*",
-    "node_modules/**", 
+    "Problem.js",
+    "User.js", 
+    "node_modules/**",
     "index.html",
     "style.css",
     "script.js",

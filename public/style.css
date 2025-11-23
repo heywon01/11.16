@@ -1,6 +1,7 @@
 /* 사용자 정의 스타일 및 폰트 적용 */
 body {
-    font-family: 'Noto Sans KR', sans-serif;
+    /*background-color: #ffeeff !important;*/
+    font-family: 'Noto Sans KR', sans-serif !important;
 }
 .custom-scrollbar::-webkit-scrollbar {
     width: 8px;

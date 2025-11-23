@@ -695,7 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // **[수정 없음]** 로그아웃 처리
-    document.getElementById('logout-button').addEventListener('click', () => {
+    document.getElementById('logout-btn').addEventListener('click', () => {
         currentUser = null;
         localStorage.removeItem('currentUser');
         showScreen('nameInput'); 
@@ -743,7 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('cancel-admin-auth').addEventListener('click', () => adminAuthModal.classList.add('hidden'));
-    document.getElementById('nav-admin-auth').addEventListener('click', () => {
+    document.getElementById('add-option-btn').addEventListener('click', () => {
         if (!currentUser) {
             showCustomAlert('먼저 로그인 해주세요.');
             return;
@@ -754,7 +754,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 네비게이션
-    document.getElementById('nav-problems').addEventListener('click', async () => {
+    document.getElementById('add-option-btn').addEventListener('click', async () => {
         showLoading();
         await fetchProblems();
         showMainView('problems');
@@ -762,14 +762,14 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCalendar(today.getFullYear(), today.getMonth());
         hideLoading();
     });
-    document.getElementById('nav-users').addEventListener('click', async () => {
+    document.getElementById('add-option-btn').addEventListener('click', async () => {
         showLoading();
         await fetchUsers();
         showMainView('users');
         renderUsers();
         hideLoading();
     });
-    document.getElementById('nav-add-problem').addEventListener('click', () => {
+    document.getElementById('add-option-btn').addEventListener('click', () => {
         if (!currentUser || !currentUser.isAdmin) {
              showCustomAlert('관리자만 접근 가능합니다.');
              return;
@@ -777,7 +777,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showMainView('addProblem');
         resetAddProblemForm();
     });
-    document.getElementById('nav-edit-account').addEventListener('click', () => {
+    document.getElementById('add-option-btn').addEventListener('click', () => {
         showMainView('account');
         document.getElementById('edit-name').value = currentUser.name;
     });
@@ -822,10 +822,10 @@ document.addEventListener('DOMContentLoaded', () => {
             hideLoading();
         }
     });
-    document.getElementById('cancel-edit-account').addEventListener('click', () => showMainView('problems'));
+    document.getElementById('cancel-admin-auth').addEventListener('click', () => showMainView('problems'));
 
     // **[API]** 문제 삭제 처리
-    document.getElementById('problem-cards-container').addEventListener('click', async (e) => {
+    document.getElementById('cancel-admin-auth').addEventListener('click', async (e) => {
         const deleteBtn = e.target.closest('.delete-problem-btn');
         if (deleteBtn) {
             e.stopPropagation();
@@ -929,7 +929,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addOptionBtn.addEventListener('click', () => createOptionInput());
 
     // 문제 이미지 미리보기
-    document.getElementById('problem-image-upload').addEventListener('change', (event) => {
+    document.getElementById('cancel-admin-auth').addEventListener('change', (event) => {
         const file = event.target.files[0];
         const preview = document.getElementById('problem-image-preview');
         if (file) {

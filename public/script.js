@@ -618,9 +618,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const newName = document.getElementById('edit-user-name').value;
             const newIsAdmin = document.getElementById('edit-user-admin').checked;
 
-            const response = await fetch(`${API_BASE_URL}/users/${editingUserId}/admin`, {
+            const response = await fetch(`${API_BASE_URL}/users/${editingUserId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}` // 토큰 기반 인증이 필요하다고 가정
+                },
                 body: JSON.stringify({ 
                     name: newName,
                     isAdmin: newIsAdmin,

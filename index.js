@@ -5,8 +5,8 @@ const cors = require('cors');
 const path = require('path');
 // ⚠️ Vercel 충돌 방지를 위해 Socket.IO 서버 모듈 대신 클라이언트 모듈을 사용합니다.
 const { io: SocketIOClient } = require("socket.io-client"); 
-const Problem = require('./Problem.js');
-const User = require('./User.js');
+const Problem = require('./models/Problem.js');
+const User = require('./models/User.js');
 
 const app = express();
 
@@ -388,6 +388,7 @@ app.use((err, req, res, next) => {
 
 // Vercel deployment requires the handler to be exported
 module.exports = app;
+
 
 // Local development server setup 
 if (!process.env.VERCEL) {

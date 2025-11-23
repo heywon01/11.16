@@ -2,13 +2,15 @@
   "name": "math-quiz-backend",
   "version": "1.0.0",
   "description": "Backend for Math Quiz App using Express and MongoDB",
-  "main": "api/index.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node api/index.js",
-    "dev": "nodemon api/index.js",
-    "build": "npx tailwindcss -i ./input.css -o ./public/output.css --minify",
-    "build-css": "npx tailwindcss -i ./input.css -o ./public/output.css",
-    "watch-css": "npx tailwindcss -i ./input.css -o ./public/output.css --watch"
+    "tw-init": "tailwindcss init -p",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "build": "tailwindcss.cmd -i ./input.css -o output.css --minify", 
+    "build-css": "tailwindcss.cmd -i ./input.css -o output.css",
+    "watch-css": "tailwindcss.cmd -i ./input.css -o output.css --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@vercel/speed-insights": "^1.2.0",
